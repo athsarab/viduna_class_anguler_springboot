@@ -1,0 +1,78 @@
+<div class="login-container">
+  <div class="login-card">
+    <h2 class="text-center mb-4">{{ isLoginMode ? 'Login' : 'Register' }} - Viduna Classroom</h2>
+    
+    <form [formGroup]="authForm" (ngSubmit)="onSubmit()">
+      <!-- Registration fields -->
+      <div *ngIf="!isLoginMode" class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">First Name</label>
+          <input type="text" class="form-control" formControlName="firstName" placeholder="Enter first name">
+          <div *ngIf="authForm.get('firstName')?.invalid && authForm.get('firstName')?.touched" class="text-danger">
+            First name is required
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Last Name</label>
+          <input type="text" class="form-control" formControlName="lastName" placeholder="Enter last name">
+          <div *ngIf="authForm.get('lastName')?.invalid && authForm.get('lastName')?.touched" class="text-danger">
+            Last name is required
+          </div>
+        </div>
+      </div>
+
+      <!-- Email field -->
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" formControlName="email" placeholder="Enter email">
+        <div *ngIf="authForm.get('email')?.invalid && authForm.get('email')?.touched" class="text-danger">
+          Valid email is required
+        </div>
+      </div>
+
+      <!-- Password field -->
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control" formControlName="password" placeholder="Enter password">
+        <div *ngIf="authForm.get('password')?.invalid && authForm.get('password')?.touched" class="text-danger">
+          Password is required (minimum 6 characters)
+        </div>
+      </div>
+
+      <!-- Role selection for registration -->
+      <div *ngIf="!isLoginMode" class="mb-3">
+        <label class="form-label">Role</label>
+        <select class="form-control" formControlName="role">
+          <option value="STUDENT">Student</option>
+          <option value="ADMIN">Admin</option>
+        </select>
+      </div>
+
+      <!-- Error message -->
+      <div *ngIf="errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Success message -->
+      <div *ngIf="successMessage" class="alert alert-success">
+        {{ successMessage }}
+      </div>
+
+      <!-- Submit button -->
+      <button type="submit" class="btn btn-primary w-100 mb-3" [disabled]="authForm.invalid || isLoading">
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+        {{ isLoginMode ? 'Login' : 'Register' }}
+      </button>
+
+      <!-- Toggle mode -->
+      <div class="text-center">
+        <p>
+          {{ isLoginMode ? "Don't have an account?" : "Already have an account?" }}
+          <a href="#" (click)="toggleMode($event)" class="text-decoration-none">
+            {{ isLoginMode ? 'Register here' : 'Login here' }}
+          </a>
+        </p>
+      </div>
+    </form>
+  </div>
+</div>

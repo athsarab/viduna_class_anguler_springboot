@@ -1,0 +1,369 @@
+<div class="admin-dashboard">
+  <!-- Navigation Header -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <strong>Viduna Classroom - Admin Portal</strong>
+      </a>
+      <div class="navbar-nav ms-auto">
+        <span class="navbar-text me-3">
+          Welcome, {{ currentUser?.firstName }} {{ currentUser?.lastName }}
+        </span>
+        <button class="btn btn-outline-light btn-sm" (click)="logout()">
+          Logout
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid mt-4">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Admin Menu</h5>
+            <div class="d-grid gap-2">
+              <button class="btn btn-outline-success btn-sm" 
+                      [class.active]="activeTab === 'classes'" 
+                      (click)="setActiveTab('classes')">
+                Manage Classes
+              </button>
+              <button class="btn btn-outline-success btn-sm" 
+                      [class.active]="activeTab === 'marks'" 
+                      (click)="setActiveTab('marks')">
+                Manage Marks
+              </button>
+              <button class="btn btn-outline-success btn-sm" 
+                      [class.active]="activeTab === 'students'" 
+                      (click)="setActiveTab('students')">
+                View Students
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-md-9">
+        <!-- Classes Management Tab -->
+        <div *ngIf="activeTab === 'classes'">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Manage Classes</h3>
+            <div>
+              <button class="btn btn-success me-2" (click)="openClassModal()">
+                <i class="bi bi-plus-circle"></i> Add New Class
+              </button>
+              <button class="btn btn-outline-success" (click)="loadClasses()">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="isLoading" class="text-center">
+            <div class="spinner-border text-success" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+
+          <div class="row" *ngIf="!isLoading">
+            <div class="col-lg-6 col-md-12 mb-4" *ngFor="let class of classes">
+              <div class="card class-card">
+                <div class="row g-0">
+                  <div class="col-md-4">
+                    <img *ngIf="class.classImage" [src]="class.classImage" class="card-img class-img" alt="Class Image">
+                    <div *ngIf="!class.classImage" class="card-img-placeholder">
+                      <i class="bi bi-book" style="font-size: 2rem; color: #ccc;"></i>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="card-body">
+                      <h5 class="card-title">{{ class.title }}</h5>
+                      <p class="card-text">{{ class.description }}</p>
+                      <p class="card-text"><small><strong>Subject:</strong> {{ class.subject }}</small></p>
+                      <p class="card-text"><small><strong>Schedule:</strong> {{ class.schedule }}</small></p>
+                      <div class="teacher-info mb-2">
+                        <img *ngIf="class.teacherImage" [src]="class.teacherImage" class="teacher-img-small" alt="Teacher">
+                        <span class="ms-2">{{ class.teacherName }}</span>
+                      </div>
+                      <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary" (click)="editClass(class)">
+                          <i class="bi bi-pencil"></i> Edit
+                        </button>
+                        <button class="btn btn-outline-info" (click)="uploadImages(class)">
+                          <i class="bi bi-image"></i> Images
+                        </button>
+                        <button class="btn btn-outline-danger" (click)="deleteClass(class.id!)">
+                          <i class="bi bi-trash"></i> Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="!isLoading && classes.length === 0" class="text-center">
+            <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+            <h4 class="mt-3 text-muted">No classes yet</h4>
+            <p class="text-muted">Create your first class to get started!</p>
+          </div>
+        </div>
+
+        <!-- Marks Management Tab -->
+        <div *ngIf="activeTab === 'marks'">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Manage Student Marks</h3>
+            <div>
+              <button class="btn btn-success me-2" (click)="openMarkModal()">
+                <i class="bi bi-plus-circle"></i> Add Marks
+              </button>
+              <button class="btn btn-outline-success" (click)="loadMarks()">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="isLoading" class="text-center">
+            <div class="spinner-border text-success" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+
+          <div *ngIf="!isLoading && marks.length > 0" class="table-responsive">
+            <table class="table table-striped">
+              <thead class="table-success">
+                <tr>
+                  <th>Student</th>
+                  <th>Class</th>
+                  <th>Subject</th>
+                  <th>Marks</th>
+                  <th>Grade</th>
+                  <th>Exam Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let mark of marks">
+                  <td>
+                    <strong>{{ mark.studentName }}</strong><br>
+                    <small class="text-muted">{{ mark.studentEmail }}</small>
+                  </td>
+                  <td>{{ mark.className }}</td>
+                  <td>{{ mark.subject }}</td>
+                  <td>
+                    <span class="badge" [class]="getGradeBadgeClass(mark.marks, mark.maxMarks)">
+                      {{ mark.marks }}/{{ mark.maxMarks }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge" [class]="getGradeBadgeClass(mark.marks, mark.maxMarks)">
+                      {{ calculateGrade(mark.marks, mark.maxMarks) }}
+                    </span>
+                  </td>
+                  <td>{{ mark.examDate | date:'short' }}</td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-primary" (click)="editMark(mark)">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <button class="btn btn-outline-danger" (click)="deleteMark(mark.id!)">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div *ngIf="!isLoading && marks.length === 0" class="text-center">
+            <i class="bi bi-graph-up" style="font-size: 4rem; color: #ccc;"></i>
+            <h4 class="mt-3 text-muted">No marks recorded</h4>
+            <p class="text-muted">Start adding student marks to track their progress!</p>
+          </div>
+        </div>
+
+        <!-- Students Tab -->
+        <div *ngIf="activeTab === 'students'">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Registered Students</h3>
+            <button class="btn btn-outline-success" (click)="loadStudents()">
+              <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+          </div>
+
+          <div *ngIf="isLoading" class="text-center">
+            <div class="spinner-border text-success" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+
+          <div *ngIf="!isLoading && students.length > 0" class="row">
+            <div class="col-lg-4 col-md-6 mb-3" *ngFor="let student of students">
+              <div class="card student-card">
+                <div class="card-body">
+                  <div class="d-flex align-items-center">
+                    <div class="student-avatar">
+                      <i class="bi bi-person-circle" style="font-size: 2.5rem; color: #28a745;"></i>
+                    </div>
+                    <div class="ms-3">
+                      <h5 class="card-title mb-1">{{ student.firstName }} {{ student.lastName }}</h5>
+                      <p class="card-text text-muted mb-0">{{ student.email }}</p>
+                      <small class="badge bg-primary">{{ student.role }}</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="!isLoading && students.length === 0" class="text-center">
+            <i class="bi bi-people" style="font-size: 4rem; color: #ccc;"></i>
+            <h4 class="mt-3 text-muted">No students registered</h4>
+            <p class="text-muted">Students will appear here after they register.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Class Modal -->
+  <div class="modal fade" id="classModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ editingClass ? 'Edit Class' : 'Add New Class' }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="classForm" (ngSubmit)="saveClass()">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Class Title</label>
+                <input type="text" class="form-control" formControlName="title" placeholder="Enter class title">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Subject</label>
+                <input type="text" class="form-control" formControlName="subject" placeholder="Enter subject">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <textarea class="form-control" formControlName="description" rows="3" placeholder="Enter class description"></textarea>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Teacher Name</label>
+                <input type="text" class="form-control" formControlName="teacherName" placeholder="Enter teacher name">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Teacher Email</label>
+                <input type="email" class="form-control" formControlName="teacherEmail" placeholder="Enter teacher email">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Schedule</label>
+              <input type="text" class="form-control" formControlName="schedule" placeholder="e.g., Mon-Wed-Fri 10:00 AM">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success" (click)="saveClass()" [disabled]="classForm.invalid">
+            {{ editingClass ? 'Update' : 'Create' }} Class
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mark Modal -->
+  <div class="modal fade" id="markModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ editingMark ? 'Edit Mark' : 'Add New Mark' }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="markForm" (ngSubmit)="saveMark()">
+            <div class="mb-3">
+              <label class="form-label">Student</label>
+              <select class="form-control" formControlName="studentId">
+                <option value="">Select Student</option>
+                <option *ngFor="let student of students" [value]="student.id">
+                  {{ student.firstName }} {{ student.lastName }} ({{ student.email }})
+                </option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Class</label>
+              <select class="form-control" formControlName="classId">
+                <option value="">Select Class</option>
+                <option *ngFor="let class of classes" [value]="class.id">
+                  {{ class.title }} - {{ class.subject }}
+                </option>
+              </select>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Marks Obtained</label>
+                <input type="number" class="form-control" formControlName="marks" placeholder="Enter marks">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Total Marks</label>
+                <input type="number" class="form-control" formControlName="maxMarks" placeholder="Enter total marks">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Exam Date</label>
+              <input type="date" class="form-control" formControlName="examDate">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Remarks (Optional)</label>
+              <textarea class="form-control" formControlName="remarks" rows="2" placeholder="Enter remarks"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success" (click)="saveMark()" [disabled]="markForm.invalid">
+            {{ editingMark ? 'Update' : 'Add' }} Mark
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Upload Modal -->
+  <div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Upload Images for {{ selectedClass?.title }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Class Image</label>
+            <input type="file" class="form-control" (change)="onClassImageSelected($event)" accept="image/*">
+            <small class="text-muted">Upload an image for the class</small>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Teacher Image</label>
+            <input type="file" class="form-control" (change)="onTeacherImageSelected($event)" accept="image/*">
+            <small class="text-muted">Upload teacher's photo</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-success" (click)="uploadSelectedImages()" [disabled]="!selectedClassImage && !selectedTeacherImage">
+            Upload Images
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
