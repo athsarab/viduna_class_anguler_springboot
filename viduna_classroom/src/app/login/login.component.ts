@@ -106,7 +106,7 @@ export class LoginComponent {
   }
 
   private register(): void {
-    const registerData = {
+    const registerData = { 
       email: this.authForm.value.email,
       password: this.authForm.value.password,
       firstName: this.authForm.value.firstName,
