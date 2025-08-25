@@ -33,6 +33,6 @@ public class UserService implements UserDetailsService {
 
     public User findById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("User not o found with id: " + id));
     }
 }
