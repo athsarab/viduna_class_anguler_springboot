@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class ClassroomService {
-  private apiUrl = 'http://localhost:8080/api/classes';
+  private apiUrl = 'http://localhost:8080/api/classes'; 
 
   constructor(
     private http: HttpClient,
