@@ -52,7 +52,7 @@ export class ClassroomService {
       'Authorization': `Bearer ${token}`
     });
 
-    return this.http.post(`${this.apiUrl}/${classId}/upload-image`, formData, { headers });
+    return this.http.post(`${this.apiUrl}/${classId}/upload-image`, formData, { headers }); 
   }
 
   uploadTeacherImage(classId: number, file: File): Observable<any> {
