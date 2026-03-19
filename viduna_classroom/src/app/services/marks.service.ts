@@ -16,7 +16,7 @@ export class MarksService {
   ) {}
 
   private getHeaders(): HttpHeaders {
-    const token = this.authService.getToken();
+    const token = this.authService.getToken(); 
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
