@@ -14,7 +14,7 @@ A comprehensive online classroom platform built with **Angular 19** (Frontend), 
 - **Class Management** - Create, update, and delete classes
 - **Student Management** - View all registered students
 - **Marks Management** - Add, edit, and delete student marks
-- **Image Upload** - Upload class images and teacher photos
+- **Image Upload** - Upload class images and teacher photos 
 - **Comprehensive Dashboard** - Manage all aspects of the classroom
 
 ### 🔧 Technical Features
